@@ -147,10 +147,12 @@ const Header: React.FC = () => {
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Configuración</span>
                 </button>
+                <a href="/help">
                 <button className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center">
                   <HelpCircle className="mr-2 h-4 w-4" />
                   <span>Centro de Ayuda</span>
                 </button>
+                </a>
                 <div className="h-px bg-gray-800 my-1"></div>
                 <button 
                   onClick={handleLogout}
