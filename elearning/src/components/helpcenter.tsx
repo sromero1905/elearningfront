@@ -399,14 +399,9 @@ const HelpCenter: React.FC = () => {
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-100 mb-4">¿No encuentras lo que buscas?</h3>
                 <p className="text-gray-400 mb-8 max-w-xl mx-auto">
-                  Nuestro equipo de soporte está disponible 24/7 para ayudarte con cualquier pregunta que tengas.
+                  Nuestro equipo de soporte está disponible de Lunes a Viernes de 9hs a 18hs para ayudarte con cualquier pregunta que tengas.
                 </p>
-                <button className="inline-flex items-center justify-center px-8 py-3 rounded-xl 
-                                 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium
-                                 hover:from-blue-600 hover:to-blue-700 transition-all duration-300
-                                 shadow-lg shadow-blue-500/25">
-                  Contactar Soporte
-                </button>
+                
               </div>
             </div>
           </div>

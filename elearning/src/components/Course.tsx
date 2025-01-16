@@ -11,18 +11,25 @@ import {
   BookOpen,
   BarChart3,
   Download,
-  MessagesSquare
+  MessageSquare,
+  MessagesSquare,
+  ChevronRight,
+  Bell
 } from 'lucide-react';
+
+interface HelpSectionProps {
+  onOpenChat: () => void;
+}
 
 interface Lesson {
   title: string;
+  description: string;
   duration: string;
   type: 'video';
   hasResources: boolean;
+  date: string;
   completed?: boolean;
   locked?: boolean;
-  date?: string;
-  description?: string;
 }
 
 interface Module {
@@ -30,13 +37,21 @@ interface Module {
   title: string;
   description: string;
   duration: string;
+  progress: number;
   completed?: boolean;
   locked?: boolean;
-  progress: number;
   lessons: Lesson[];
 }
 
 const CourseContent: React.FC = () => {
+  // Mock del usuario actual
+  const currentUser = {
+    name: "Carlos Rodriguez",
+    progress: "40%",
+    nextClass: "7 Feb, 10:00"
+  };
+
+  // Datos de los módulos
   const modules: Module[] = [
     {
       id: 1,
@@ -233,47 +248,50 @@ const CourseContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A1122] via-[#0D1729] to-[#0F1C33]">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Header Principal */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">
-            Programa de Negociación Constructiva
-          </h1>
-          <p className="text-lg text-blue-300/80 max-w-3xl mx-auto">
-            Desarrolla habilidades avanzadas de negociación a través de un programa práctico y comprehensivo
-          </p>
+      {/* Header con Bienvenida */}
+      <header className="border-b border-gray-800/50">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                ¡Bienvenido, {currentUser.name}! 👋
+              </h1>
+              <p className="text-blue-400/80">
+                Continúa tu viaje de aprendizaje en Negociación Constructiva
+              </p>
+            </div>
+            
+          </div>
         </div>
+      </header>
 
+      <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Dashboard Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           {[
             {
               icon: <BookOpen className="h-6 w-6" />,
               label: "Progreso Total",
-              value: "40%",
-              color: "text-blue-400"
+              value: currentUser.progress
             },
             {
               icon: <Clock className="h-6 w-6" />,
               label: "Duración Total",
-              value: "40 horas",
-              color: "text-indigo-400"
+              value: "40 horas"
             },
             {
               icon: <MessagesSquare className="h-6 w-6" />,
               label: "Próxima Clase",
-              value: "7 Feb, 10:00",
-              color: "text-purple-400"
+              value: currentUser.nextClass
             },
             {
               icon: <BarChart3 className="h-6 w-6" />,
               label: "Certificación",
-              value: "En progreso",
-              color: "text-emerald-400"
+              value: "En progreso"
             }
           ].map((stat, index) => (
             <div key={index} className="bg-[#111827]/50 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6">
-              <div className={`${stat.color} mb-4 bg-white/5 w-12 h-12 rounded-xl flex items-center justify-center`}>
+              <div className="text-white mb-4 bg-white/5 w-12 h-12 rounded-xl flex items-center justify-center">
                 {stat.icon}
               </div>
               <p className="text-sm text-gray-400">{stat.label}</p>
@@ -438,14 +456,25 @@ const CourseContent: React.FC = () => {
         </div>
 
         {/* Soporte Técnico */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
-            ¿Necesitas ayuda? Contáctanos en{' '}
-            <a href="mailto:soporte@negociacionconstructiva.com" className="text-blue-400 hover:text-blue-300 transition-colors">
-              soporte@negociacionconstructiva.com
-            </a>
-          </p>
-        </div>
+        <div className="mt-12 relative">
+  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl" />
+  <div className="relative bg-gray-800/30 backdrop-blur-xl border border-gray-700/30 rounded-xl p-6 text-center">
+    <p className="text-gray-300 font-medium mb-4">
+      ¿Necesitas ayuda?
+    </p>
+    <a 
+      href="/help" 
+      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
+                 bg-gray-700/50 hover:bg-gray-700/70
+                 text-gray-200 text-sm font-medium
+                 border border-gray-600/30
+                 transition-all duration-300"
+    >
+      <MessageSquare className="w-4 h-4" />
+      <span>Centro de Ayuda</span>
+    </a>
+  </div>
+</div>
       </div>
     </div>
   );

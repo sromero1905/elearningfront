@@ -157,6 +157,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword }) => {
                   </div>
                 </div>
 
+                 
                 <button
                   type="submit"
                   disabled={formState.isLoading}
@@ -165,6 +166,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword }) => {
                   <span>{formState.isLoading ? 'Verificando credenciales...' : 'Iniciar sesión'}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
+                
               </form>
 
               <div className="mt-6 text-center">
