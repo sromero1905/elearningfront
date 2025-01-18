@@ -138,15 +138,18 @@ const Header: React.FC = () => {
                   <p className="text-sm font-medium text-white">Carlos Rodriguez</p>
                   <p className="text-xs text-gray-400">carlos@empresa.com</p>
                 </div>
+                
                 <div className="h-px bg-gray-800 my-1"></div>
                 <button className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center">
                   <User className="mr-2 h-4 w-4" />
                   <span>Mi Perfil</span>
                 </button>
+                <a href="/configuration">
                 <button className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Configuración</span>
                 </button>
+                </a>
                 <a href="/help">
                 <button className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center">
                   <HelpCircle className="mr-2 h-4 w-4" />
