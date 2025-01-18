@@ -39,8 +39,8 @@ const Configuration: React.FC = () => {
   });
 
   const userData: UserData = {
-    name: "Juan Pérez",
-    email: "juan.perez@email.com",
+    name: "Carlos Rodriguez",
+    email: "carlos@empresa.com",
     joinDate: "Enero 2024",
     role: "Estudiante"
   };
@@ -256,7 +256,7 @@ const Configuration: React.FC = () => {
                   onClick={() => setActiveSection(section.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeSection === section.id 
-                      ? 'bg-slate-600 text-white' 
+                      ? 'bg-blue-900 text-white' 
                       : 'text-slate-400 hover:bg-slate-700'
                   }`}
                 >

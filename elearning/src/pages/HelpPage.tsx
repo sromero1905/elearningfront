@@ -2,12 +2,20 @@ import React from 'react';
 import HelpCenter from '../components/helpcenter';
 import Header from "../components/Header";
 import ChatPanel from '../components/chat';
+
 const HelpPage = () => {
   return (
-    <main className="">
-      <div className="">
+    <main className="relative min-h-screen">
+      <div className="relative z-50">
+        <Header />
+      </div>
+      
+      <div className="relative z-0">
         <HelpCenter />
-        <ChatPanel/>
+      </div>
+      
+      <div className="relative z-40">
+        <ChatPanel />
       </div>
     </main>
   );
