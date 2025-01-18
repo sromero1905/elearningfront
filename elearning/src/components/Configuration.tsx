@@ -168,7 +168,7 @@ const Configuration: React.FC = () => {
             <div className="flex justify-end pt-4">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                className="px-6 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium"
               >
                 Actualizar Contraseña
               </button>
@@ -209,7 +209,7 @@ const Configuration: React.FC = () => {
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" />
-                  <div className="w-12 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <div className="w-12 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                 </label>
               </div>
             ))}
@@ -225,7 +225,7 @@ const Configuration: React.FC = () => {
         {/* Profile Header */}
         <div className="mb-12 flex items-center gap-6 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-slate-500 to-purple-500 flex items-center justify-center text-white">
               <span className="text-4xl font-bold">{userData.name.charAt(0)}</span>
             </div>
           </div>
@@ -256,7 +256,7 @@ const Configuration: React.FC = () => {
                   onClick={() => setActiveSection(section.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeSection === section.id 
-                      ? 'bg-indigo-600 text-white' 
+                      ? 'bg-slate-600 text-white' 
                       : 'text-slate-400 hover:bg-slate-700'
                   }`}
                 >
