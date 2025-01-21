@@ -43,6 +43,49 @@ const Dropdown: React.FC<DropdownProps> = ({ trigger, children, align = 'right' 
   );
 };
 
+const NCLogo = () => (
+  <svg className="h-10 w-10" viewBox="0 0 100 100">
+    <defs>
+      <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#60A5FA" />
+        <stop offset="100%" stopColor="#3B82F6" />
+      </linearGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <rect 
+      x="2" 
+      y="2" 
+      width="96" 
+      height="96" 
+      rx="16" 
+      fill="none"
+      stroke="url(#logoGradient)"
+      strokeWidth="2"
+      className="opacity-80"
+    />
+    <text 
+      x="50" 
+      y="65" 
+      fontFamily="system-ui, -apple-system" 
+      fontSize="42" 
+      fontWeight="400" 
+      fill="white" 
+      textAnchor="middle"
+      letterSpacing="1"
+      className="opacity-90"
+      filter="url(#glow)"
+    >
+      NC
+    </text>
+  </svg>
+);
+
 const Header: React.FC = () => {
   const handleLogout = () => {
     console.log('Logout clicked');
@@ -59,11 +102,7 @@ const Header: React.FC = () => {
             </button>
             
             <div className="flex items-center space-x-4">
-      <img 
-        src="/logo.png" 
-        alt="Logo" 
-        className="h-15 w-12"
-      />
+              <NCLogo />
               
               <div className="hidden md:block">
                 <a href="/home/2">
