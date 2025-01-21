@@ -39,8 +39,8 @@ const Configuration: React.FC = () => {
   });
 
   const userData: UserData = {
-    name: "Carlos Rodriguez",
-    email: "carlos@empresa.com",
+    name: "Francisco Romero",
+    email: "Francisco.romero@empresa.com",
     joinDate: "Enero 2024",
     role: "Estudiante"
   };

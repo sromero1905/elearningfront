@@ -36,10 +36,10 @@ const courseData = {
 };
 
 const userProfileData = {
-  name: "Carlos Rodriguez",
+  name: "Francisco Romero",
   position: "Director Comercial",
   company: "Empresa Internacional S.A.",
-  email: "carlos.rodriguez@empresa.com",
+  email: "Francisco.romero@empresa.com",
   objetivos: [
     "Desarrollar estrategias de negociación avanzadas",
     "Mejorar habilidades de comunicación ejecutiva",
@@ -104,7 +104,7 @@ const CourseProfile: React.FC = () => {
                   {courseData.name}
                 </h1>
                 <div className="flex flex-col gap-1">
-                  <p className="text-gray-100 font-medium">{courseData.instructor}</p>
+                  <p className="text-gray-100 font-medium">Instructor: {courseData.instructor}</p>
                   <p className="text-sm text-gray-400">{courseData.credentials}</p>
                 </div>
               </div>

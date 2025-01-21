@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, Mail, ArrowRight, Key, Building2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginCredentials {
   email: string;
@@ -14,11 +15,11 @@ interface LoginFormState {
 }
 
 interface LoginProps {
-  onLogin?: (credentials: LoginCredentials) => Promise<void>;
   onResetPassword?: (email: string) => Promise<void>;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword }) => {
+const Login: React.FC<LoginProps> = ({ onResetPassword }) => {
+  const navigate = useNavigate();
   const [formState, setFormState] = useState<LoginFormState>({
     email: '',
     password: '',
@@ -38,14 +39,17 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword }) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    if (!onLogin) return;
-
+    
     try {
       setFormState(prev => ({ ...prev, isLoading: true, error: null }));
-      await onLogin({
-        email: formState.email,
-        password: formState.password
-      });
+      
+      // Verificar las credenciales hardcodeadas
+      if (formState.email === 'fran@mail.com' && formState.password === '123') {
+        // Redireccionar a home/2
+        navigate('/home/2');
+      } else {
+        throw new Error('Credenciales inválidas');
+      }
     } catch (error) {
       setFormState(prev => ({
         ...prev,
@@ -157,7 +161,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword }) => {
                   </div>
                 </div>
 
-                 
                 <button
                   type="submit"
                   disabled={formState.isLoading}
@@ -166,7 +169,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword }) => {
                   <span>{formState.isLoading ? 'Verificando credenciales...' : 'Iniciar sesión'}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                
               </form>
 
               <div className="mt-6 text-center">

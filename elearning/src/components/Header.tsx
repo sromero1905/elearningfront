@@ -59,12 +59,11 @@ const Header: React.FC = () => {
             </button>
             
             <div className="flex items-center space-x-4">
-              {/* Logo SVG */}
-              <svg className="h-10 w-10" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="25" cy="25" r="23" className="stroke-blue-500" strokeWidth="2"/>
-                <path d="M16 25C16 20.5817 19.5817 17 24 17H26C30.4183 17 34 20.5817 34 25C34 29.4183 30.4183 33 26 33H24C19.5817 33 16 29.4183 16 25Z" fill="#3B82F6"/>
-                <path d="M25 16V34" className="stroke-white" strokeWidth="2"/>
-              </svg>
+      <img 
+        src="/logo.png" 
+        alt="Logo" 
+        className="h-15 w-12"
+      />
               
               <div className="hidden md:block">
                 <a href="/home/2">
@@ -124,8 +123,8 @@ const Header: React.FC = () => {
             >
               <div className="py-2">
                 <div className="px-4 py-2">
-                  <p className="text-sm font-medium text-white">Carlos Rodriguez</p>
-                  <p className="text-xs text-gray-400">carlos@empresa.com</p>
+                  <p className="text-sm font-medium text-white">Francisco Romero</p>
+                  <p className="text-xs text-gray-400">Francisco.romero@empresa.com"</p>
                 </div>
                 <div className="h-px bg-gray-800 my-1"></div>
                 <a href="/my-profile">
@@ -147,6 +146,7 @@ const Header: React.FC = () => {
                   </button>
                 </a>
                 <div className="h-px bg-gray-800 my-1"></div>
+                <a href="/">
                 <button 
                   onClick={handleLogout}
                   className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-gray-800 flex items-center"
@@ -154,6 +154,7 @@ const Header: React.FC = () => {
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Cerrar sesión</span>
                 </button>
+                </a>
               </div>
             </Dropdown>
           </div>

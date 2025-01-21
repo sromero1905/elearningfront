@@ -46,7 +46,7 @@ interface Module {
 const CourseContent: React.FC = () => {
   // Mock del usuario actual
   const currentUser = {
-    name: "Carlos Rodriguez",
+    name: "Francisco Romero",
     progress: "40%",
     nextClass: "7 Feb, 10:00"
   };
