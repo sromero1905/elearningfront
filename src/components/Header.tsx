@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Menu
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface DropdownProps {
   trigger: ReactNode;
@@ -87,8 +88,19 @@ const NCLogo = () => (
 );
 
 const Header: React.FC = () => {
-  const handleLogout = () => {
-    console.log('Logout clicked');
+  const navigate = useNavigate();
+
+  // Mejorado para limpiar el localStorage y navegar al login
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault(); // Evita la navegación del enlace
+    console.log('Cerrando sesión...');
+    
+    // Eliminar datos de autenticación del localStorage
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userData');
+    
+    // Redirigir al login
+    navigate('/', { replace: true });
   };
 
   return (
@@ -185,7 +197,6 @@ const Header: React.FC = () => {
                   </button>
                 </a>
                 <div className="h-px bg-gray-800 my-1"></div>
-                <a href="/">
                 <button 
                   onClick={handleLogout}
                   className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-gray-800 flex items-center"
@@ -193,7 +204,6 @@ const Header: React.FC = () => {
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Cerrar sesión</span>
                 </button>
-                </a>
               </div>
             </Dropdown>
           </div>

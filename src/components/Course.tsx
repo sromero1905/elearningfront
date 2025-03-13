@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   PlayCircle, 
   CheckCircle2, 
@@ -16,6 +16,13 @@ import {
   ChevronRight,
   Bell
 } from 'lucide-react';
+
+interface UserData {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  id?: number;
+}
 
 interface HelpSectionProps {
   onOpenChat: () => void;
@@ -44,14 +51,36 @@ interface Module {
 }
 
 const CourseContent: React.FC = () => {
-  // Mock del usuario actual
-  const currentUser = {
-    name: "Francisco Romero",
+  const [userData, setUserData] = useState<UserData>({});
+  useEffect(() => {
+    try {
+      const userDataString = localStorage.getItem('userData');
+      if (userDataString) {
+        const parsedUserData = JSON.parse(userDataString);
+        setUserData(parsedUserData);
+      }
+    } catch (error) {
+      console.error("Error al cargar datos del usuario:", error);
+    }
+  }, []);
+
+  const getUserName = () => {
+    if (userData.nombre && userData.apellido) {
+      return `${userData.nombre} ${userData.apellido}`;
+    } else if (userData.nombre) {
+      return userData.nombre;
+    } else if (userData.email) {
+      return userData.email.split('@')[0];
+    } else {
+      return "Usuario";
+    }
+  };
+  
+  const userProgress = {
     progress: "40%",
     nextClass: "7 Feb, 10:00"
   };
 
-  // Datos de los módulos
   const modules: Module[] = [
     {
       id: 1,
@@ -254,7 +283,7 @@ const CourseContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">
-                ¡Bienvenido, {currentUser.name}! 👋
+                ¡Bienvenido, {getUserName()}! 👋
               </h1>
               <p className="text-blue-400/80">
                 Continúa tu viaje de aprendizaje en Negociación Constructiva
@@ -272,7 +301,7 @@ const CourseContent: React.FC = () => {
             {
               icon: <BookOpen className="h-6 w-6" />,
               label: "Progreso Total",
-              value: currentUser.progress
+              value: userProgress.progress
             },
             {
               icon: <Clock className="h-6 w-6" />,
@@ -282,7 +311,7 @@ const CourseContent: React.FC = () => {
             {
               icon: <MessagesSquare className="h-6 w-6" />,
               label: "Próxima Clase",
-              value: currentUser.nextClass
+              value: userProgress.nextClass
             },
             {
               icon: <BarChart3 className="h-6 w-6" />,
@@ -457,24 +486,24 @@ const CourseContent: React.FC = () => {
 
         {/* Soporte Técnico */}
         <div className="mt-12 relative">
-  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl" />
-  <div className="relative bg-gray-800/30 backdrop-blur-xl border border-gray-700/30 rounded-xl p-6 text-center">
-    <p className="text-gray-300 font-medium mb-4">
-      ¿Necesitas ayuda?
-    </p>
-    <a 
-      href="/help" 
-      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
-                 bg-gray-700/50 hover:bg-gray-700/70
-                 text-gray-200 text-sm font-medium
-                 border border-gray-600/30
-                 transition-all duration-300"
-    >
-      <MessageSquare className="w-4 h-4" />
-      <span>Centro de Ayuda</span>
-    </a>
-  </div>
-</div>
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl" />
+          <div className="relative bg-gray-800/30 backdrop-blur-xl border border-gray-700/30 rounded-xl p-6 text-center">
+            <p className="text-gray-300 font-medium mb-4">
+              ¿Necesitas ayuda?
+            </p>
+            <a 
+              href="/help" 
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
+                         bg-gray-700/50 hover:bg-gray-700/70
+                         text-gray-200 text-sm font-medium
+                         border border-gray-600/30
+                         transition-all duration-300"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Centro de Ayuda</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

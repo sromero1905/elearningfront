@@ -152,6 +152,11 @@ const CourseProfile: React.FC = () => {
               </div>
             </div>
 
+
+
+         
+
+
             {/* Progress Section */}
             <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-700/50">
               <div className="flex justify-between items-center mb-4">
