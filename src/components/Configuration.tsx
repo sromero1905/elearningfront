@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, FormEvent, ChangeEvent } from 'react';
+import React, { useState, ReactNode, FormEvent, ChangeEvent, useEffect } from 'react';
 import {
   Mail,
   Calendar,
@@ -23,10 +23,10 @@ interface PasswordForm {
 }
 
 interface UserData {
-  name: string;
-  email: string;
-  joinDate: string;
-  role: string;
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  // Puedes añadir más campos según la estructura de tus datos
 }
 
 const Configuration: React.FC = () => {
@@ -37,13 +37,22 @@ const Configuration: React.FC = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  // Estado para almacenar datos del usuario desde localStorage
+  const [userData, setUserData] = useState<UserData>({});
 
-  const userData: UserData = {
-    name: "Francisco Romero",
-    email: "Francisco.romero@empresa.com",
-    joinDate: "Enero 2024",
-    role: "Estudiante"
-  };
+  // Cargar datos del usuario cuando el componente se monta
+  useEffect(() => {
+    try {
+      const userDataString = localStorage.getItem('userData');
+      if (userDataString) {
+        const parsedUserData = JSON.parse(userDataString);
+        setUserData(parsedUserData);
+        console.log("Datos del usuario cargados:", parsedUserData);
+      }
+    } catch (error) {
+      console.error("Error al cargar datos del usuario:", error);
+    }
+  }, []);
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPasswordForm({
@@ -62,6 +71,33 @@ const Configuration: React.FC = () => {
     });
   };
 
+  // Funciones para obtener información del usuario
+  const getUserFullName = () => {
+    if (userData.nombre && userData.apellido) {
+      return `${userData.nombre} ${userData.apellido}`;
+    } else if (userData.nombre) {
+      return userData.nombre;
+    } else if (userData.email) {
+      return userData.email.split('@')[0];
+    } else {
+      return "Usuario";
+    }
+  };
+
+  const getUserEmail = () => {
+    return userData.email || "sin correo registrado";
+  };
+
+  const getUserInitial = () => {
+    if (userData.nombre) {
+      return userData.nombre.charAt(0);
+    } else if (userData.email) {
+      return userData.email.charAt(0);
+    } else {
+      return "U";
+    }
+  };
+
   const sections = [
     {
       id: 'account',
@@ -75,19 +111,19 @@ const Configuration: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">Nombre Completo</label>
                 <div className="bg-slate-900 px-4 py-3 rounded-lg text-white border border-slate-700">
-                  {userData.name}
+                  {getUserFullName()}
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">Correo Electrónico</label>
                 <div className="bg-slate-900 px-4 py-3 rounded-lg text-white border border-slate-700">
-                  {userData.email}
+                  {getUserEmail()}
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">Rol</label>
                 <div className="bg-slate-900 px-4 py-3 rounded-lg text-white border border-slate-700">
-                  {userData.role}
+                  Estudiante
                 </div>
               </div>
             </div>
@@ -226,20 +262,20 @@ const Configuration: React.FC = () => {
         <div className="mb-12 flex items-center gap-6 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-gradient-to-r from-slate-500 to-purple-500 flex items-center justify-center text-white">
-              <span className="text-4xl font-bold">{userData.name.charAt(0)}</span>
+              <span className="text-4xl font-bold">{getUserInitial()}</span>
             </div>
           </div>
           <div>
-            <h1 className="text-3xl font-bold mb-2">{userData.name}</h1>
+            <h1 className="text-3xl font-bold mb-2">{getUserFullName()}</h1>
             <div className="flex items-center gap-4 text-slate-400">
               <span className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                {userData.email}
+                {getUserEmail()}
               </span>
               <span className="text-slate-600">•</span>
               <span className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Miembro desde {userData.joinDate}
+                Miembro desde {new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
               </span>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, Mail, ArrowRight, Key, Building2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginCredentials {
   email: string;
@@ -14,6 +15,7 @@ interface LoginState {
 }
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [state, setState] = useState<LoginState>({
     email: '',
     password: '',
@@ -79,8 +81,8 @@ const Login: React.FC = () => {
       localStorage.setItem('userToken', responseData.token);
       localStorage.setItem('userData', JSON.stringify(responseData.user));
   
-      
-      window.location.href = '/home/2';
+      // Usar navigate en lugar de window.location.href
+      navigate('/home/2');
   
     } catch (error) {
       console.error('Error detallado de login:', error);

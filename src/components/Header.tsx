@@ -15,6 +15,13 @@ interface DropdownProps {
   align?: 'left' | 'right';
 }
 
+interface UserData {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  // Otros campos del usuario que puedan existir
+}
+
 const Dropdown: React.FC<DropdownProps> = ({ trigger, children, align = 'right' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -89,6 +96,39 @@ const NCLogo = () => (
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
+  const [userData, setUserData] = useState<UserData>({});
+
+  useEffect(() => {
+    // Cargar los datos del usuario desde localStorage
+    try {
+      const userDataString = localStorage.getItem('userData');
+      if (userDataString) {
+        const parsedUserData = JSON.parse(userDataString);
+        setUserData(parsedUserData);
+      }
+    } catch (error) {
+      console.error("Error al cargar datos del usuario:", error);
+    }
+  }, []);
+
+  // Función para obtener el nombre completo del usuario
+  const getUserFullName = () => {
+    if (userData.nombre && userData.apellido) {
+      return `${userData.nombre} ${userData.apellido}`;
+    } else if (userData.nombre) {
+      return userData.nombre;
+    } else if (userData.email) {
+      // Si solo tenemos email, usamos la parte antes del @
+      return userData.email.split('@')[0];
+    } else {
+      return "Usuario";
+    }
+  };
+
+  // Función para obtener el email del usuario
+  const getUserEmail = () => {
+    return userData.email || "sin correo registrado";
+  };
 
   // Mejorado para limpiar el localStorage y navegar al login
   const handleLogout = (e: React.MouseEvent) => {
@@ -174,8 +214,8 @@ const Header: React.FC = () => {
             >
               <div className="py-2">
                 <div className="px-4 py-2">
-                  <p className="text-sm font-medium text-white">Francisco Romero</p>
-                  <p className="text-xs text-gray-400">Francisco.romero@empresa.com"</p>
+                  <p className="text-sm font-medium text-white">{getUserFullName()}</p>
+                  <p className="text-xs text-gray-400">{getUserEmail()}</p>
                 </div>
                 <div className="h-px bg-gray-800 my-1"></div>
                 <a href="/my-profile">

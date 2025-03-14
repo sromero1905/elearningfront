@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   Clock,
@@ -15,6 +15,14 @@ import {
   MessageSquare,
   Heart
 } from 'lucide-react';
+
+// Interfaz para los datos del usuario
+interface UserData {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  // Otros campos que pueda tener el usuario
+}
 
 // Datos del Curso de Negociación
 const courseData = {
@@ -35,11 +43,10 @@ const courseData = {
   participations: 28
 };
 
-const userProfileData = {
-  name: "Francisco Romero",
+// Datos estáticos del perfil que se completarán con los datos del usuario
+const staticProfileData = {
   position: "Director Comercial",
   company: "Empresa Internacional S.A.",
-  email: "Francisco.romero@empresa.com",
   objetivos: [
     "Desarrollar estrategias de negociación avanzadas",
     "Mejorar habilidades de comunicación ejecutiva",
@@ -85,6 +92,52 @@ const userProfileData = {
 };
 
 const CourseProfile: React.FC = () => {
+  // Estado para almacenar los datos del usuario
+  const [userData, setUserData] = useState<UserData>({});
+
+  // Cargar datos del usuario al montar el componente
+  useEffect(() => {
+    try {
+      const userDataString = localStorage.getItem('userData');
+      if (userDataString) {
+        const parsedUserData = JSON.parse(userDataString);
+        setUserData(parsedUserData);
+        console.log("Datos del usuario cargados:", parsedUserData);
+      }
+    } catch (error) {
+      console.error("Error al cargar datos del usuario:", error);
+    }
+  }, []);
+
+  // Función para obtener el nombre completo del usuario
+  const getUserFullName = () => {
+    if (userData.nombre && userData.apellido) {
+      return `${userData.nombre} ${userData.apellido}`;
+    } else if (userData.nombre) {
+      return userData.nombre;
+    } else if (userData.email) {
+      return userData.email.split('@')[0];
+    } else {
+      return "Usuario";
+    }
+  };
+
+  // Función para obtener el email del usuario
+  const getUserEmail = () => {
+    return userData.email || "";
+  };
+
+  // Función para obtener la primera letra del nombre para el avatar
+  const getUserInitial = () => {
+    if (userData.nombre) {
+      return userData.nombre.charAt(0).toUpperCase();
+    } else if (userData.email) {
+      return userData.email.charAt(0).toUpperCase();
+    } else {
+      return "U";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800">
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
@@ -152,11 +205,6 @@ const CourseProfile: React.FC = () => {
               </div>
             </div>
 
-
-
-         
-
-
             {/* Progress Section */}
             <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-700/50">
               <div className="flex justify-between items-center mb-4">
@@ -175,19 +223,18 @@ const CourseProfile: React.FC = () => {
             </div>
           </div>
 
-          {/* User Profile */}
+          {/* User Profile - Con datos dinámicos */}
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl">
             <div className="text-center mb-6">
               <div className="inline-block mb-4">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center mx-auto ring-4 ring-blue-500/20">
                   <span className="text-3xl font-bold text-white">
-                    {userProfileData.name.charAt(0)}
+                    {getUserInitial()}
                   </span>
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-gray-100 mb-1">{userProfileData.name}</h2>
-              <p className="text-gray-400 text-sm mb-1">{userProfileData.position}</p>
-              <p className="text-gray-500 text-sm">{userProfileData.company}</p>
+              <h2 className="text-xl font-bold text-gray-100 mb-1">{getUserFullName()}</h2>
+              <p className="text-gray-400 text-sm mb-1">{getUserEmail()}</p>
             </div>
 
             <div className="space-y-6">
@@ -197,7 +244,7 @@ const CourseProfile: React.FC = () => {
                   Objetivos del Programa
                 </h4>
                 <ul className="space-y-2">
-                  {userProfileData.objetivos.map((objetivo, index) => (
+                  {staticProfileData.objetivos.map((objetivo, index) => (
                     <li key={index} className="text-sm text-gray-400 flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
                       {objetivo}
@@ -212,7 +259,7 @@ const CourseProfile: React.FC = () => {
                   Próximas Actividades
                 </h4>
                 <div className="space-y-3">
-                  {userProfileData.proximasActividades.map((actividad, index) => (
+                  {staticProfileData.proximasActividades.map((actividad, index) => (
                     <div key={index} className="flex items-start gap-3">
                       <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                       <div>
@@ -243,7 +290,7 @@ const CourseProfile: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userProfileData.certificaciones.map((cert, index) => (
+            {staticProfileData.certificaciones.map((cert, index) => (
               <div key={index} className="bg-gray-900/50 rounded-xl p-6 border border-gray-700/50">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
