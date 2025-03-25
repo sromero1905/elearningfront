@@ -19,7 +19,6 @@ interface UserData {
   nombre?: string;
   apellido?: string;
   email?: string;
-  // Otros campos del usuario que puedan existir
 }
 
 const Dropdown: React.FC<DropdownProps> = ({ trigger, children, align = 'right' }) => {
@@ -132,10 +131,8 @@ const Header: React.FC = () => {
 
   // Mejorado para limpiar el localStorage y navegar al login
   const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault(); // Evita la navegación del enlace
-    console.log('Cerrando sesión...');
+    e.preventDefault(); 
     
-    // Eliminar datos de autenticación del localStorage
     localStorage.removeItem('userToken');
     localStorage.removeItem('userData');
     
@@ -175,32 +172,7 @@ const Header: React.FC = () => {
 
           {/* Íconos de la derecha */}
           <div className="flex items-center justify-end space-x-4 ml-4">
-            {/* Notificaciones */}
-            <Dropdown 
-              trigger={
-                <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-blue-500 rounded-full ring-2 ring-gray-900"></span>
-                </button>
-              }
-            >
-              <div className="py-2">
-                <div className="px-4 py-2 text-sm text-gray-400 font-medium">
-                  Notificaciones
-                </div>
-                <div className="h-px bg-gray-800 my-1"></div>
-                <div className="max-h-72 overflow-y-auto p-1">
-                  <div className="p-3 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer">
-                    <p className="text-sm text-white font-medium">Nuevo contenido disponible</p>
-                    <p className="text-xs text-gray-400 mt-1">Se ha añadido nuevo material al Módulo 2</p>
-                  </div>
-                  <div className="p-3 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer">
-                    <p className="text-sm text-white font-medium">Próxima sesión</p>
-                    <p className="text-xs text-gray-400 mt-1">Recordatorio: Clase virtual mañana a las 10:00</p>
-                  </div>
-                </div>
-              </div>
-            </Dropdown>
+          
 
             {/* Perfil de Usuario */}
             <Dropdown 

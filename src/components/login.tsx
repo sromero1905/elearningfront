@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { Lock, Mail, ArrowRight, Key, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
 interface LoginState {
   email: string;
   password: string;
   error: string | null;
+  success: string | null;
   isLoading: boolean;
+  resetToken: string;
+  newPassword: string;
+  confirmPassword: string;
+  resetStep: 'requestToken' | 'enterToken';
 }
 
 const Login: React.FC = () => {
@@ -20,7 +20,12 @@ const Login: React.FC = () => {
     email: '',
     password: '',
     error: null,
-    isLoading: false
+    success: null,
+    isLoading: false,
+    resetToken: '',
+    newPassword: '',
+    confirmPassword: '',
+    resetStep: 'requestToken'
   });
   const [isResetMode, setIsResetMode] = useState(false);
 
@@ -29,7 +34,8 @@ const Login: React.FC = () => {
     setState(prev => ({
       ...prev,
       [name]: value,
-      error: null
+      error: null,
+      success: null
     }));
   };
   
@@ -39,25 +45,27 @@ const Login: React.FC = () => {
     
     console.log('Intentando login con:', {
       email: state.email,
-      passwordLength: state.password.length
     });
     
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
+      // Enviamos las credenciales sin modificar al servidor
+      // El servidor se encargará de verificar la contraseña con bcrypt
       const response = await fetch('http://localhost:1337/api/user-elearnings/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':  `Bearer ${API_TOKEN}`
+          'Authorization': API_TOKEN ? `Bearer ${API_TOKEN}` : ''
         },
         body: JSON.stringify({ 
-          email: state.email,
-          password: state.password
+          email: state.email.trim(),
+          password: state.password // Enviamos la contraseña sin modificar
         })
       });
   
       console.log('Respuesta recibida, status:', response.status);
+      
       const responseText = await response.text();
       console.log('Respuesta como texto:', responseText);
       
@@ -67,12 +75,12 @@ const Login: React.FC = () => {
         console.log('Respuesta parseada:', responseData);
       } catch (parseError) {
         console.error('Error al parsear respuesta JSON:', parseError);
-        throw new Error('Respuesta no válida del servidor');
+        throw new Error('Respuesta no válida del servidor: ' + responseText.substring(0, 100) + '...');
       }
   
       if (!response.ok) {
         console.error('Error del servidor:', responseData);
-        throw new Error(responseData.error?.message || 'Error al iniciar sesión');
+        throw new Error(responseData.error?.message || responseData.message || 'Error al iniciar sesión');
       }
   
       console.log('Login exitoso, token recibido:', !!responseData.token);
@@ -81,7 +89,7 @@ const Login: React.FC = () => {
       localStorage.setItem('userToken', responseData.token);
       localStorage.setItem('userData', JSON.stringify(responseData.user));
   
-      // Usar navigate en lugar de window.location.href
+      // Navegar a la página de inicio
       navigate('/home/2');
   
     } catch (error) {
@@ -95,11 +103,12 @@ const Login: React.FC = () => {
     }
   };
   
-  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Solicitar código de restablecimiento
+  const handleRequestResetToken = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState(prev => ({ ...prev, isLoading: true, error: null, success: null }));
       
       const response = await fetch('http://localhost:1337/api/user-elearnings/forgot-password', {
         method: 'POST',
@@ -114,13 +123,72 @@ const Login: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
+        throw new Error(data.message || 'Error al solicitar el código de restablecimiento');
+      }
+
+      setState(prev => ({
+        ...prev,
+        success: 'Se ha enviado un código de restablecimiento a tu correo electrónico',
+        resetStep: 'enterToken',
+        error: null
+      }));
+
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error.message : 'Error al solicitar el código de restablecimiento'
+      }));
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+  
+  // Restablecer contraseña con código
+  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (state.newPassword !== state.confirmPassword) {
+      setState(prev => ({
+        ...prev,
+        error: 'Las contraseñas no coinciden'
+      }));
+      return;
+    }
+    
+    try {
+      setState(prev => ({ ...prev, isLoading: true, error: null, success: null }));
+      
+      const response = await fetch('http://localhost:1337/api/user-elearnings/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: state.email,
+          resetToken: state.resetToken,
+          newPassword: state.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
         throw new Error(data.message || 'Error al restablecer la contraseña');
       }
 
       setState(prev => ({
         ...prev,
-        error: 'Se han enviado instrucciones para restablecer la contraseña'
+        success: 'Tu contraseña ha sido restablecida exitosamente',
+        resetToken: '',
+        newPassword: '',
+        confirmPassword: '',
+        error: null
       }));
+      
+      // Regresar a la pantalla de inicio de sesión después de 3 segundos
+      setTimeout(() => {
+        setIsResetMode(false);
+      }, 3000);
 
     } catch (error) {
       setState(prev => ({
@@ -237,48 +305,152 @@ const Login: React.FC = () => {
             <div className="p-8">
               <div className="mb-8">
                 <h2 className="text-xl font-semibold text-white">Recuperar acceso</h2>
-                <p className="text-gray-400 text-sm mt-2">Se le enviará un correo con las instrucciones</p>
+                <p className="text-gray-400 text-sm mt-2">
+                  {state.resetStep === 'requestToken' 
+                    ? 'Se te enviará un código para restablecer tu contraseña' 
+                    : 'Ingresa el código recibido y tu nueva contraseña'}
+                </p>
               </div>
 
-              <form onSubmit={handleResetPassword} className="space-y-6">
-                {state.error && (
-                  <div className="p-4 rounded-lg bg-red-950/50 border border-red-900/50 text-red-400 text-sm">
-                    {state.error}
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <label htmlFor="reset-email" className="block text-sm font-medium text-gray-300">
-                    Correo electrónico corporativo
-                  </label>
-                  <div className="relative group">
-                    <Key className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5 group-hover:text-blue-400 transition-colors" />
-                    <input
-                      type="email"
-                      id="reset-email"
-                      name="email"
-                      value={state.email}
-                      onChange={handleInputChange}
-                      className="w-full pl-12 pr-4 py-3 bg-gray-950/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder-gray-500 transition-all"
-                      placeholder="correo@empresa.com"
-                      required
-                      disabled={state.isLoading}
-                    />
-                  </div>
+              {state.success && (
+                <div className="p-4 rounded-lg bg-green-950/50 border border-green-900/50 text-green-400 text-sm mb-6">
+                  {state.success}
                 </div>
+              )}
+              {state.error && (
+                <div className="p-4 rounded-lg bg-red-950/50 border border-red-900/50 text-red-400 text-sm mb-6">
+                  {state.error}
+                </div>
+              )}
 
-                <button
-                  type="submit"
-                  disabled={state.isLoading}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all duration-200"
-                >
-                  {state.isLoading ? 'Enviando instrucciones...' : 'Recuperar contraseña'}
-                </button>
-              </form>
+              {state.resetStep === 'requestToken' ? (
+                <form onSubmit={handleRequestResetToken} className="space-y-6">
+                  <div className="space-y-2">
+                    <label htmlFor="reset-email" className="block text-sm font-medium text-gray-300">
+                      Correo electrónico corporativo
+                    </label>
+                    <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5 group-hover:text-blue-400 transition-colors" />
+                      <input
+                        type="email"
+                        id="reset-email"
+                        name="email"
+                        value={state.email}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-950/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder-gray-500 transition-all"
+                        placeholder="correo@empresa.com"
+                        required
+                        disabled={state.isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={state.isLoading}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all duration-200"
+                  >
+                    {state.isLoading ? 'Enviando código...' : 'Solicitar código'}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPassword} className="space-y-6">
+                  <div className="space-y-2">
+                    <label htmlFor="resetToken" className="block text-sm font-medium text-gray-300">
+                      Código de restablecimiento
+                    </label>
+                    <div className="relative group">
+                      <Key className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5 group-hover:text-blue-400 transition-colors" />
+                      <input
+                        type="text"
+                        id="resetToken"
+                        name="resetToken"
+                        value={state.resetToken}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-950/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder-gray-500 transition-all"
+                        placeholder="Código de 6 dígitos"
+                        maxLength={6}
+                        required
+                        disabled={state.isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-300">
+                      Nueva contraseña
+                    </label>
+                    <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5 group-hover:text-blue-400 transition-colors" />
+                      <input
+                        type="password"
+                        id="newPassword"
+                        name="newPassword"
+                        value={state.newPassword}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-950/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder-gray-500 transition-all"
+                        placeholder="Nueva contraseña"
+                        required
+                        disabled={state.isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300">
+                      Confirmar contraseña
+                    </label>
+                    <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5 group-hover:text-blue-400 transition-colors" />
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={state.confirmPassword}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-950/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder-gray-500 transition-all"
+                        placeholder="Confirma tu nueva contraseña"
+                        required
+                        disabled={state.isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={state.isLoading}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all duration-200"
+                  >
+                    {state.isLoading ? 'Procesando...' : 'Restablecer contraseña'}
+                  </button>
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setState(prev => ({ ...prev, resetStep: 'requestToken', success: null, error: null }))}
+                      className="text-sm text-gray-400 hover:text-blue-400 transition-colors"
+                      disabled={state.isLoading}
+                    >
+                      Volver a solicitar un código
+                    </button>
+                  </div>
+                </form>
+              )}
 
               <div className="mt-6 text-center">
                 <button
-                  onClick={() => setIsResetMode(false)}
+                  onClick={() => {
+                    setIsResetMode(false);
+                    setState(prev => ({ 
+                      ...prev, 
+                      resetStep: 'requestToken',
+                      resetToken: '',
+                      newPassword: '',
+                      confirmPassword: '',
+                      success: null,
+                      error: null
+                    }));
+                  }}
                   className="text-sm text-gray-400 hover:text-blue-400 transition-colors"
                   disabled={state.isLoading}
                 >

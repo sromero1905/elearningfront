@@ -81,10 +81,11 @@ interface Capsula {
   descripcion: string;
   link_drive: string;
 }
+const API_URL = process.env.BACK_URL || 'http://localhost:1337/api';
 
 // Configuración de Axios
 const api = axios.create({
-  baseURL: 'http://localhost:1337/api',
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -759,8 +760,6 @@ const CourseContent: React.FC = () => {
                       );
                     })}
                   </div>
-                  
-                  {/* Footer con información adicional ya no es necesario */}
                 </div>
               </div>
               
@@ -938,7 +937,7 @@ const CourseContent: React.FC = () => {
                               <div className="flex flex-wrap items-center gap-4 mt-3">
                                 <span className="flex items-center text-sm text-gray-400">
                                   <Clock className="h-4 w-4 mr-1" />
-                                  {lesson.duration}
+                                  {lesson.duration} hs
                                 </span>
                                 {lesson.date && (
                                   <span className="flex items-center text-sm text-gray-400">

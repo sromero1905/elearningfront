@@ -14,7 +14,10 @@ import {
   User,
   Key,
   Globe,
+  AlertCircle,
+  CheckCircle,
 } from 'lucide-react';
+import axios from 'axios';
 
 interface PasswordForm {
   currentPassword: string;
@@ -26,7 +29,13 @@ interface UserData {
   nombre?: string;
   apellido?: string;
   email?: string;
-  // Puedes añadir más campos según la estructura de tus datos
+  id?: number;
+}
+
+// Interfaz para el estado de alerta
+interface AlertState {
+  type: 'success' | 'error' | 'info' | null;
+  message: string;
 }
 
 const Configuration: React.FC = () => {
@@ -39,6 +48,13 @@ const Configuration: React.FC = () => {
   });
   // Estado para almacenar datos del usuario desde localStorage
   const [userData, setUserData] = useState<UserData>({});
+  // Estado para manejar el loading durante el cambio de contraseña
+  const [loading, setLoading] = useState<boolean>(false);
+  // Estado para mostrar alertas
+  const [alert, setAlert] = useState<AlertState>({
+    type: null,
+    message: ''
+  });
 
   // Cargar datos del usuario cuando el componente se monta
   useEffect(() => {
@@ -61,14 +77,74 @@ const Configuration: React.FC = () => {
     });
   };
 
-  const handlePasswordSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handlePasswordSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Cambio de contraseña:', passwordForm);
-    setPasswordForm({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+    
+    // Reset alert
+    setAlert({
+      type: null,
+      message: ''
     });
+    
+    // Validar que las contraseñas coincidan
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setAlert({
+        type: 'error',
+        message: 'Las contraseñas nuevas no coinciden'
+      });
+      return;
+    }
+
+    // Validar que la contraseña tenga al menos 8 caracteres
+    if (passwordForm.newPassword.length < 8) {
+      setAlert({
+        type: 'error',
+        message: 'La contraseña debe tener al menos 8 caracteres'
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Obtener la URL base de la API desde las variables de entorno
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337/api';
+      
+      // Crear instancia de Axios con token de autenticación
+      const token = localStorage.getItem('jwt');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      // Llamar a la API para cambiar la contraseña
+      const response = await axios.post(`${API_URL}/user-elearnings/change-password`, {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+        userId: userData.id,
+      }, { headers });
+      
+      // Mostrar mensaje de éxito
+      setAlert({
+        type: 'success',
+        message: 'Contraseña actualizada correctamente'
+      });
+      
+      // Limpiar el formulario
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+    } catch (error: any) {
+      console.error('Error al cambiar la contraseña:', error);
+      
+      // Mostrar mensaje de error
+      setAlert({
+        type: 'error',
+        message: error.response?.data?.message || 'Error al cambiar la contraseña'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Funciones para obtener información del usuario
@@ -96,6 +172,26 @@ const Configuration: React.FC = () => {
     } else {
       return "U";
     }
+  };
+
+  // Componente de alerta
+  const Alert = ({ type, message }: AlertState) => {
+    if (!type) return null;
+    
+    return (
+      <div className={`mt-4 p-4 rounded-lg flex items-start gap-3 ${
+        type === 'success' ? 'bg-green-900/50 text-green-400 border border-green-800' : 
+        type === 'error' ? 'bg-red-900/50 text-red-400 border border-red-800' :
+        'bg-blue-900/50 text-blue-400 border border-blue-800'
+      }`}>
+        {type === 'success' ? (
+          <CheckCircle className="h-5 w-5 mt-0.5" />
+        ) : (
+          <AlertCircle className="h-5 w-5 mt-0.5" />
+        )}
+        <span>{message}</span>
+      </div>
+    );
   };
 
   const sections = [
@@ -129,25 +225,6 @@ const Configuration: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
-            <h4 className="text-xl font-semibold text-white mb-4 border-b border-slate-700 pb-3">Preferencias</h4>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Idioma</label>
-                <select className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white">
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Zona Horaria</label>
-                <select className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white">
-                  <option value="utc-3">America/Buenos_Aires</option>
-                  <option value="utc-4">America/Santiago</option>
-                </select>
-              </div>
-            </div>
-          </div>
         </div>
       )
     },
@@ -201,55 +278,32 @@ const Configuration: React.FC = () => {
                 required
               />
             </div>
+            
+            {/* Mostrar alerta de éxito o error */}
+            <Alert type={alert.type} message={alert.message} />
+            
             <div className="flex justify-end pt-4">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                disabled={loading}
+                className={`px-6 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium flex items-center gap-2 ${
+                  loading ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               >
-                Actualizar Contraseña
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Actualizando...
+                  </>
+                ) : (
+                  <>Actualizar Contraseña</>
+                )}
               </button>
             </div>
           </form>
-        </div>
-      )
-    },
-    {
-      id: 'notifications',
-      title: 'Notificaciones',
-      icon: <Bell className="w-5 h-5" />,
-      content: (
-        <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
-          <h4 className="text-xl font-semibold text-white mb-4 border-b border-slate-700 pb-3">Configuración de Notificaciones</h4>
-          <div className="space-y-4">
-            {[
-              { 
-                title: 'Notificaciones por Email', 
-                description: 'Recibe actualizaciones importantes en tu correo',
-                id: 'email-notifications'
-              },
-              { 
-                title: 'Notificaciones Push', 
-                description: 'Recibe alertas en tiempo real en tu navegador',
-                id: 'push-notifications'
-              },
-              { 
-                title: 'Resumen Semanal', 
-                description: 'Recibe un resumen de tu progreso semanal',
-                id: 'weekly-summary'
-              },
-            ].map((item) => (
-              <div key={item.id} className="flex items-center justify-between bg-slate-900 p-4 rounded-lg border border-slate-700">
-                <div>
-                  <h4 className="text-white font-medium">{item.title}</h4>
-                  <p className="text-sm text-slate-400 mt-1">{item.description}</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
-                  <div className="w-12 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                </label>
-              </div>
-            ))}
-          </div>
         </div>
       )
     }
